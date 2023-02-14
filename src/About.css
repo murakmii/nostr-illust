@@ -1,0 +1,19 @@
+#About {
+  width: 600px;
+  background-color: #202124;
+  padding: 20px;
+  margin: 40px auto 0 auto;
+}
+
+#About h2 {
+  text-align: center;
+}
+
+#About p {
+  margin: 20px 0 20px 0;
+  line-height: 2;
+}
+
+#About ul {
+  padding-left: 20px;
+}
