@@ -3,3 +3,8 @@
   height: 100%;
   overflow-y: scroll;
 }
+
+#IllustList h2 {
+  padding-top: 100px;
+  text-align: center;
+}

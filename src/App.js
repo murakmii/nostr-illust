@@ -173,7 +173,7 @@ function App() {
       </div>
       {connected && (
         <NostrContext.Provider value={{relay: relayRef}}>
-          <IllustContext.Provider value={{ notes: normalizedNotes.sort((a, b) => b.createdAt - a.createdAt), setUntil, profiles, profilesDispatch}}>
+          <IllustContext.Provider value={{ loading, notes: normalizedNotes.sort((a, b) => b.createdAt - a.createdAt), setUntil, profiles, profilesDispatch}}>
             <div id="Main">
               {child || <IllustList />}
             </div>

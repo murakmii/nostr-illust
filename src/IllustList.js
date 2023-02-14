@@ -4,11 +4,11 @@ import IllustNote from './IllustNote';
 import { useContext } from 'react';
 
 function IllistList() {
-  const { notes } = useContext(IllustContext);
+  const { notes, loading } = useContext(IllustContext);
 
   return (
     <div id="IllustList">
-      {notes.map(n => <IllustNote key={n.id} note={n} />)}
+      {loading ? <h2>Loading...</h2> : notes.map(n => <IllustNote key={n.id} note={n} />)}
     </div>
   )
 }
