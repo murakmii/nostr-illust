@@ -1,5 +1,5 @@
 const cacheKey = 'nostr-illust-cache';
-const currentVersion = 5;
+const currentVersion = 6;
 let maxUsage = 1024 * 1024 * 3;
 let dirty = false;
 

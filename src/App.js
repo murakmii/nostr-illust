@@ -63,6 +63,7 @@ function App() {
     relayRef.current = new MultiplexedRelays(1, [
       'wss://relay.damus.io',
       'wss://relay.snort.social',
+      'wss://relay.nostr.band',
     ]);
   }
 
@@ -139,6 +140,7 @@ function App() {
         profilesDispatch({ type: 'RECEIVED', events, expected: pubkeys });
         stop();
       },
+      ['wss://relay.nostr.band'],
     );
   }, [eose]);
 

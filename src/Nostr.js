@@ -95,7 +95,7 @@ export class MultiplexedRelays {
   // イベント受信時にはhandleEventが、全リレーサーバーでEOSEが返却された時点でhandleEOSEが呼び出される。
   // リレーサーバーによってEOSEが返されるタイミングはまちまちであるため、handleEOSEが呼び出されるよりも前に、
   // 一部サーバーのEOSE後のイベントがhandleEventに渡される可能性がある点に留意する。
-  subscribe(filters, handleEvent, handleEOSE) {
+  subscribe(filters, handleEvent, handleEOSE, excludeRelays) {
     const receivedIDs = new Set();
     const subscriptions = [];
     const allEOSE = [];
@@ -105,7 +105,8 @@ export class MultiplexedRelays {
       console.info(`close subscription for ${s.relayURL}`);
     });
 
-    this.activeRelays.forEach(r => {
+    const exclude = new Set(excludeRelays || []);
+    this.activeRelays.filter(r => !exclude.has(r.url)).forEach(r => {
       const sub = r.sub(filters);
       subscriptions.push({sub, relayURL: r.url});
 

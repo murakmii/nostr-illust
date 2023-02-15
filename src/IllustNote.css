@@ -1,7 +1,7 @@
 .IllustNote {
   width: 250px;
   height: 250px;
-  margin: 20px;
+  margin: 30px 40px;
   display: block;
   transition-duration: 0.2s;
   transition-property: opacity;
@@ -9,6 +9,7 @@
   background-size: cover;
   position: relative;
   float: left;
+  background-color: #2f2543;
 }
 
 .IllustNote canvas {
@@ -29,12 +30,12 @@
   position: absolute;
   display: flex;
   background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(3px);
-  padding: 10px;
+  backdrop-filter: blur(4px);
+  padding: 6px;
 }
 
 .IllustNote.New .Profile {
-  background-color: rgb(205 58 58 / 60%);
+  background-color: rgb(114 53 242 / 60%);
 } 
 
 .IllustNote .Profile img {

@@ -32,7 +32,7 @@ function IllustNote({ note }) {
         sy = 0;
       }
 
-      const canvasSize = Math.max(Math.ceil(sw/2), 600);
+      const canvasSize = 600;
 
       canvasRef.current.width = canvasSize;
       canvasRef.current.height = canvasSize;
@@ -40,7 +40,7 @@ function IllustNote({ note }) {
       const ctx = canvasRef.current.getContext('2d');
       ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvasSize, canvasSize);
 
-      canvasRef.current.toBlob((blob) => doCache(note, blob), "image/jpeg", 0.7);
+      canvasRef.current.toBlob((blob) => doCache(note, blob), "image/webp", 0.6);
     };
     img.onerror = () => setFallbackImg(true);
     img.src = note.link;
