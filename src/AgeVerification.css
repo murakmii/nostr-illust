@@ -1,0 +1,30 @@
+#AgeVerification {
+  width: 600px;
+  background-color: #202124;
+  padding: 20px;
+  margin: 40px auto 0 auto;
+}
+
+#AgeVerification h2 {
+  text-align: center;
+}
+
+#AgeVerification p {
+  margin-top: 20px;
+  line-height: 2;
+  text-align: center;
+}
+
+#AgeVerification button {
+  width: 80px;
+  padding: 10px 0;
+  margin: 20px;
+  background-color: #7436a7;
+  display: inline-block;
+  border: none;
+  cursor: pointer;
+}
+
+#AgeVerification button:hover {
+  background-color: #55247c;
+}

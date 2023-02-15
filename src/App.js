@@ -1,5 +1,6 @@
 import './App.css';
 import IllustList from './IllustList';
+import AgeVerification from './AgeVerification';
 import { useOutlet, Link } from 'react-router-dom';
 import { useRef, useEffect, useState, createContext, useReducer } from 'react';
 import { MultiplexedRelays } from './Nostr';
@@ -71,6 +72,7 @@ function App() {
   const [profiles, profilesDispatch] = useReducer(profilesReducer, {});
   const [loading, setLoading] = useState(false);
   const [eose, setEOSE] = useState(false);
+  const [over18, setOver18] = useState(!!window.localStorage.getItem('over18'));
   
   const receiveNote = (event, relayURL) => {
     setNotes(prev => ({ ...prev, [event.id]: {
@@ -140,6 +142,15 @@ function App() {
     );
   }, [eose]);
 
+  const onVerifiedAge = () => {
+    try {
+      window.localStorage.setItem('over18', new Date().getTime());
+    } catch (error) {
+      // プライベートモード等では保存できない場合があるが、無視
+    }
+    setOver18(true);
+  };
+
   const normalizedNotes = Object.values(notes).map(n => {
     const links = Array.from(n.content.matchAll(linkMatcher), m => m[0]);
     if (links.length == 0) {
@@ -175,7 +186,7 @@ function App() {
         <NostrContext.Provider value={{relay: relayRef}}>
           <IllustContext.Provider value={{ loading, notes: normalizedNotes.sort((a, b) => b.createdAt - a.createdAt), setUntil, profiles, profilesDispatch}}>
             <div id="Main">
-              {child || <IllustList />}
+              {child || (over18 ? <IllustList /> : <AgeVerification onVerified={onVerifiedAge} />)}
             </div>
           </IllustContext.Provider>
         </NostrContext.Provider>
