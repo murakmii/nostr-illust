@@ -63,7 +63,7 @@ function App() {
     relayRef.current = new MultiplexedRelays(1, [
       'wss://relay.damus.io',
       'wss://relay.snort.social',
-      'wss://relay.nostr.band',
+      //'wss://relay.nostr.band',
     ]);
   }
 
