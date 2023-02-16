@@ -4,7 +4,7 @@
   overflow-y: scroll;
 }
 
-#IllustList h2 {
+h2.NetworkStatus {
   padding-top: 100px;
   text-align: center;
 }

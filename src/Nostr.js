@@ -1,29 +1,22 @@
 import { relayInit } from 'nostr-tools';
 
-const nip05PartMatcher = /^[a-z0-9_\-\.]+$/;
-
-export const parseNIP05Identifier = (identifier) => {
-  const parts = identifier.toLowerCase().split('@');
-  if (parts.length !== 2) {
-    return null;
-  }
-
-  return (nip05PartMatcher.test(parts[0]) && nip05PartMatcher.test(parts[1])) ? parts : null;
-}
-
-// NIP-07(https://github.com/nostr-protocol/nips/blob/master/07.md)対応状況を確認する。
-// 確認といってもwindowオブジェクトのプロパティを確認するだけ。
-export const enableNIP07 = () => window.nostr && window.nostr.getPublicKey && window.nostr.signEvent;
-
-// リレーサーバーに接続する。
-// 接続に成功した場合は履行値としてRelay、
-// 失敗した場合は拒否理由として接続先URLを返すようなPromiseを返す。
+// タイムアウト付きで接続する
 function connectToRelay(url) {
   return new Promise((resolve, reject) => {
     const relay = relayInit(url);
 
+    const timeout = setTimeout(() => {
+      try { relay.close() } catch (_) { }
+
+      console.warn(`timed out connecting to ${url}`);
+      reject(url);
+    }, 2000);
+
     relay.connect()
-      .then(() => resolve(relay))
+      .then(() => {
+        clearTimeout(timeout);
+        resolve(relay);
+      })
       .catch(() => reject(url));
   });
 }
@@ -33,7 +26,39 @@ export class MultiplexedRelays {
     this.guarantee = guarantee;
     this.relayURLs = relayURLs;
     this.activeRelays = [];
+    this.deadRelays = [];
     this.conn = null;
+
+    // deadRelaysをチェックし、可能ならactiveRelaysに戻す関数を定期的に実行する
+    const keepaliver = () => {
+      const connecting = [];
+      this.deadRelays.forEach((relay) => {
+        // 死んでから1分は時間をおく
+        if (new Date().getTime() - relay.deadAt < 60000) {
+          return;
+        }
+
+        console.info(`keepaliver start checking: ${relay.url}`);
+        connecting.push(connectToRelay(relay.url));
+      });
+
+      Promise.allSettled(connecting)
+        .then(result => {
+          this.deadRelays = [];
+
+          result.forEach(r => {
+            if (r.status === 'fulfilled') {
+              console.info(`recovered connection to: ${r.value.url}`);
+              this.activeRelays.push(r.value);
+            } else {
+              console.info(`stay as dead relay connection to: ${r.reason}`);
+              this.deadRelays.push({ url: r.reason, deadAt: new Date().getTime() });
+            }
+          });
+        })
+        .finally(() => setTimeout(keepaliver, 10000));
+    }
+    keepaliver();
   }
 
   connect() {
@@ -49,6 +74,8 @@ export class MultiplexedRelays {
             if (r.status === 'fulfilled') {
               connected.push(r.value);
             } else {
+              // 接続に失敗したリレーはdeadRelays送りにし定期的にチェックする
+              this.deadRelays.push({ url: r.reason, deadAt: new Date().getTime() });
               console.warn(`failed to connect relay server: ${r.reason}`);
             }
           });
@@ -67,54 +94,26 @@ export class MultiplexedRelays {
     return this.conn;
   }
 
-  connectivityStatus() {
-    const active = new Set(this.activeRelays.map(r => r.url));
-    const status = {};
-
-    this.relayURLs.forEach(r => status[r] = active.has(r));
-    return status;
-  }
-
-  // 一連のリレーサーバーへイベントを送信し、1件でも送信できたなら履行されるPromiseを返す
-  publish(event) {
-    return Promise.any(this.activeRelays.map(r => {
-      console.log(`publish event to ${r.url}`);
-      return new Promise((resolve, reject) => {
-        const pub = r.publish(event);
-        pub.on('ok', resolve);
-        pub.on('seen', resolve);
-        pub.on('failed', (reason) => {
-          console.warn(`failed to publish event to ${r.url}: ${reason}`);
-          reject();
-        });
-      });
-    }));
-  }
-
-  // 戻り値の関数を呼び出し停止するまで行われるsubscribeを実行する。
-  // イベント受信時にはhandleEventが、全リレーサーバーでEOSEが返却された時点でhandleEOSEが呼び出される。
-  // リレーサーバーによってEOSEが返されるタイミングはまちまちであるため、handleEOSEが呼び出されるよりも前に、
-  // 一部サーバーのEOSE後のイベントがhandleEventに渡される可能性がある点に留意する。
-  subscribe(filters, handleEvent, handleEOSE, excludeRelays) {
+  subscribe(filters, handleEvent, handleEOSE) {
     const receivedIDs = new Set();
-    const subscriptions = [];
     const allEOSE = [];
 
+    let subscriptions = [];
+
+    // 任意のタイミングでコールバック側からsubscribeを止めるための関数
     const stop = () => subscriptions.forEach(s => {
       s.sub.unsub();
-      console.info(`close subscription for ${s.relayURL}`);
+      console.info(`close subscription for ${s.url}`);
     });
 
-    const exclude = new Set(excludeRelays || []);
-    this.activeRelays.filter(r => !exclude.has(r.url)).forEach(r => {
-      const sub = r.sub(filters);
-      subscriptions.push({sub, relayURL: r.url});
-
+    this.activeRelays.forEach(r => {
       console.info(`start subscription for ${r.url}`, filters);
 
+      const sub = r.sub(filters);
+      subscriptions.push({sub, url: r.url});
+
+      // eventハンドラは単にコールバックにイベントを渡すだけ
       sub.on('event', (event) => {
-        // 複数のリレーサーバーから重複してイベントを受信した場合は後続を無視する。
-        // SetにイベントIDがたまり続けるが、掲示板程度であれば問題ないと判断。
         if (receivedIDs.has(event.id)) {
           return;
         }
@@ -122,10 +121,40 @@ export class MultiplexedRelays {
         receivedIDs.add(event.id);
         handleEvent(event, r.url, stop);
       });
-      allEOSE.push(new Promise((resolve => sub.on('eose', resolve))));
+
+      // EOSEの監視 or タイムアウト
+      // 一定時間内にEOSEが来ない場合はタイムアウトさせsubscribeも止めておく
+      allEOSE.push(new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          console.warn(`EOSE timed out from ${r.url}`);
+          subscriptions = subscriptions.filter(s => s.url !== r.url); // stopで重複してunsubされないよう抜いておく
+          try { sub.unsub() } catch (_) {}
+          
+          reject(r.url);
+        }, 3000);
+
+        sub.on('eose', () => {
+          clearTimeout(timeout);
+          resolve(r);
+        });
+      }));
     });
 
-    Promise.all(allEOSE).then(() => handleEOSE && handleEOSE(stop))
+    Promise.allSettled(allEOSE)
+      .then(result => {
+        result.forEach(r => {
+          if (r.status !== 'rejected') {
+            return;
+          }
+
+          // EOSE受信がタイムアウトしたリレーはdeadRelays行き
+          this.activeRelays = this.activeRelays.filter(ar => ar.url !== r.reason);
+          if (!this.deadRelays.find(dr => dr.url !== r.reason)) {
+            this.deadRelays.push({ url: r.reason, deadAt: new Date().getTime() });
+          }
+        });
+      })
+      .finally(() => handleEOSE && handleEOSE(stop));
 
     return stop;
   }

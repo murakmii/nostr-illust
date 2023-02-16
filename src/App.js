@@ -63,7 +63,7 @@ function App() {
     relayRef.current = new MultiplexedRelays(1, [
       'wss://relay.damus.io',
       'wss://relay.snort.social',
-      //'wss://relay.nostr.band',
+      'wss://relay.nostr.band',
     ]);
   }
 
@@ -118,7 +118,7 @@ function App() {
   useEffect(() => {
     const exists = new Set(Object.keys(profiles));
     const pubkeys = Array.from(new Set(Object.values(notes).map(t => t.pubkey).filter(p => !exists.has(p))));
-
+  
     if (pubkeys.length == 0 || !eose) {
       return;
     }
@@ -140,7 +140,6 @@ function App() {
         profilesDispatch({ type: 'RECEIVED', events, expected: pubkeys });
         stop();
       },
-      ['wss://relay.nostr.band'],
     );
   }, [eose]);
 
@@ -184,6 +183,7 @@ function App() {
         <div className="Space"></div>
         <Link to="/about">#about</Link>
       </div>
+      {!connected && <h2 className="NetworkStatus">Connecting...</h2>}
       {connected && (
         <NostrContext.Provider value={{relay: relayRef}}>
           <IllustContext.Provider value={{ loading, notes: normalizedNotes.sort((a, b) => b.createdAt - a.createdAt), setUntil, profiles, profilesDispatch}}>

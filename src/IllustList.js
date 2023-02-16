@@ -8,7 +8,7 @@ function IllistList() {
 
   return (
     <div id="IllustList">
-      {loading ? <h2>Loading...</h2> : notes.map(n => <IllustNote key={n.id} note={n} />)}
+      {loading ? <h2 className="NetworkStatus">Loading...</h2> : notes.map(n => <IllustNote key={n.id} note={n} />)}
     </div>
   )
 }
