@@ -1,5 +1,11 @@
 import { relayInit } from 'nostr-tools';
 
+export const Relays = [
+  'wss://relay.damus.io',
+  'wss://relay.snort.social',
+  'wss://relay.nostr.band',
+];
+
 // タイムアウト付きで接続する
 function connectToRelay(url) {
   return new Promise((resolve, reject) => {

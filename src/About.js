@@ -1,4 +1,5 @@
 import './About.css';
+import { Relays } from './Nostr';
 
 function About() {
   return (
@@ -10,11 +11,9 @@ function About() {
         がNostr上の#illustタグ付きノートを見やすくために作ったページです。<br/>
         利用する方は自己責任でお願いします。ページを利用することで発生したいかなる損害に対しても、@murakmiiは責任を負いません。<br/><br/>
         以下のリレーからノートを取得しています。
-
       </p>
       <ul>
-        <li>relay.damus.io</li>
-        <li>relay.snort.social</li>
+        {Relays.map((r, i) => <li key={i+1}>{r.replace('wss://', '')}</li>)}
       </ul>
     </div>
   )

@@ -3,7 +3,7 @@ import IllustList from './IllustList';
 import AgeVerification from './AgeVerification';
 import { useOutlet, Link } from 'react-router-dom';
 import { useRef, useEffect, useState, createContext, useReducer } from 'react';
-import { MultiplexedRelays } from './Nostr';
+import { MultiplexedRelays, Relays } from './Nostr';
 
 export const NostrContext = createContext();
 export const IllustContext = createContext();
@@ -60,11 +60,7 @@ function profilesReducer(state, action) {
 function App() {
   const relayRef = useRef(null);
   if (relayRef.current === null) {
-    relayRef.current = new MultiplexedRelays(1, [
-      'wss://relay.damus.io',
-      'wss://relay.snort.social',
-      'wss://relay.nostr.band',
-    ]);
+    relayRef.current = new MultiplexedRelays(1, Relays);
   }
 
   const [connected, setConnected] = useState(false);
@@ -177,12 +173,14 @@ function App() {
   const child = useOutlet();
   return (
     <div id="App">
-      <div id="Header">
-        <h1><Link to="/">#illust</Link></h1>
-        <p>tagged notes on Nostr</p>
-        <div className="Space"></div>
-        <Link to="/about">#about</Link>
-      </div>
+      <header>
+        <div id="Header">
+          <h1><Link to="/">#illust</Link></h1>
+          <p>tagged notes on Nostr</p>
+          <div className="Space"></div>
+          <Link to="/about">#about</Link>
+        </div>
+      </header>
       {!connected && <h2 className="NetworkStatus">Connecting...</h2>}
       {connected && (
         <NostrContext.Provider value={{relay: relayRef}}>

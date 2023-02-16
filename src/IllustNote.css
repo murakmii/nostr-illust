@@ -1,15 +1,14 @@
 .IllustNote {
   width: 250px;
   height: 250px;
-  margin: 30px 40px;
   display: block;
   transition-duration: 0.2s;
   transition-property: opacity;
   text-decoration: none;
   background-size: cover;
   position: relative;
-  float: left;
   background-color: #2f2543;
+  overflow: hidden;
 }
 
 .IllustNote canvas {
@@ -23,20 +22,32 @@
   opacity: 0.7;
 }
 
+.IllustNote > p {
+  top: 10px;
+  right: -25px;
+  width: 100px;
+  height: 30px;
+  line-height: 30px;
+  font-weight: bold;
+  font-size: 1.2em;
+  text-align: center;
+  position: absolute;
+  background-color: #764dff;
+  transform: rotate(45deg);
+  box-shadow: 0 0 6px #4f4f4f;
+}
+
 .IllustNote .Profile {
   right: 0;
   left: 0;
   bottom: 0;
   position: absolute;
   display: flex;
-  background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.68);
+  backdrop-filter: blur(3px);
   padding: 6px;
 }
-
-.IllustNote.New .Profile {
-  background-color: rgb(114 53 242 / 60%);
-} 
 
 .IllustNote .Profile img {
   width: 40px;
@@ -49,10 +60,10 @@
   line-height: 1.2;
 }
 
-.IllustNote .Profile span {
-  color: #9AA0A6;
+.IllustNote .Profile b {
+  font-size: 1.2em;
 }
 
-.IllustNote.New .Profile span {
-  color: #dedede;
+.IllustNote .Profile span {
+  color: #9AA0A6;
 }

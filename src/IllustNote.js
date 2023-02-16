@@ -47,13 +47,15 @@ function IllustNote({ note }) {
   }, []);
 
   return (
-    <a className={"IllustNote " + (note.isNew ? 'New' : '')}
+    <a className="IllustNote"
       href={`https://snort.social/e/${nip19.noteEncode(note.id)}`}
       target="_blank"
       rel="noreferrer"
       style={{ backgroundImage: imageUrl ? `url('${imageUrl}')` : null }}>
 
       {!cache && !fallbackImg && <canvas ref={canvasRef}  />}
+
+      {note.isNew && <p>new!</p>}
       
       {profile && <div className="Profile">
         <img src={profile.picture} />

@@ -3,10 +3,16 @@
   height: 100%; 
 }
 
-#Header {
+header {
   width: 100%;
+  background-color: #202124;
+}
+
+#Header {
+  width: 850px;
   height: 50px;
-  padding: 10px 20px;
+  padding: 10px 0;
+  margin: 0 auto;
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -36,4 +42,5 @@
   width: 100%;
   height: calc(100% - 50px);
   position: relative;
+  overflow-x: hidden;
 }
