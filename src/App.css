@@ -3,6 +3,16 @@
   height: 100%; 
 }
 
+#App .NetworkStatus {
+  bottom: 0;
+  position: fixed;
+  z-index: 100;
+  width: 100%;
+  text-align: right;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
 header {
   width: 100%;
   background-color: #202124;

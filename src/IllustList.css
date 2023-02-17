@@ -11,8 +11,3 @@
   display: flex;
   justify-content: space-between;
 }
-
-h2.NetworkStatus {
-  padding-top: 100px;
-  text-align: center;
-}

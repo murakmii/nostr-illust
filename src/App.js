@@ -96,7 +96,7 @@ function App() {
           {
             kinds: [1],
             '#t': ['illust', 'Illust', 'illustration', 'Illustration'],
-            limit: 50,
+            limit: 20,
             until,
           },
         ],
@@ -107,8 +107,6 @@ function App() {
         },
       )
     })();
-
-    return () => relayRef.current.close();
   }, [until]);
 
   useEffect(() => {
@@ -116,6 +114,10 @@ function App() {
     const pubkeys = Array.from(new Set(Object.values(notes).map(t => t.pubkey).filter(p => !exists.has(p))));
   
     if (pubkeys.length == 0 || !eose) {
+      if (eose) {
+        setLoading(false);
+        setEOSE(false);
+      }
       return;
     }
 
@@ -182,6 +184,7 @@ function App() {
         </div>
       </header>
       {!connected && <h2 className="NetworkStatus">Connecting...</h2>}
+      {connected && loading && <h2 className="NetworkStatus">Loading...</h2>}
       {connected && (
         <NostrContext.Provider value={{relay: relayRef}}>
           <IllustContext.Provider value={{ loading, notes: normalizedNotes.sort((a, b) => b.createdAt - a.createdAt), setUntil, profiles, profilesDispatch}}>
